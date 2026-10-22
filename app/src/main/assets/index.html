@@ -12,26 +12,28 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
 .layer img,.layer canvas,.layer video{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:fill}
 svg#ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 svg#ov .h{pointer-events:all;cursor:grab}
-#bar{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:6px;
-padding:8px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
+#bar{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:4px;
+padding:5px max(8px,env(safe-area-inset-right,0px)) calc(5px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
 background:color-mix(in srgb,var(--panel) 94%,transparent);border-top:1px solid var(--line);z-index:5}
-.row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
-.lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-right:2px}
-button,label.btn{font:600 15px var(--ui);color:var(--fg);background:#1f232c;border:1px solid var(--line);border-radius:6px;padding:8px 12px;min-height:44px;min-width:44px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
+.row{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;align-items:center}
+.lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-right:2px}
+button,label.btn{font:600 13px var(--ui);color:var(--fg);background:#1f232c;border:1px solid var(--line);border-radius:5px;padding:4px 9px;min-height:34px;min-width:34px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button,label.btn{box-sizing:border-box;height:34px;line-height:1}
+button svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
 button:focus-visible,label.btn:focus-within{outline:2px solid var(--accent)}
 button.go{background:var(--accent);color:#001014;border-color:var(--accent)}
 button.on{border-color:var(--accent);color:var(--accent)}
 input[type=file]{display:none}
-input[type=range]{width:90px;accent-color:var(--accent)}
-.op{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dim)}
+input[type=range]{width:70px;accent-color:var(--accent)}
+.op{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--dim)}
 #hint{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font-size:13px;color:var(--fg);background:#000c;border:1px solid var(--line);padding:8px 12px;border-radius:6px;z-index:5;text-align:center;max-width:90%}
-#hide{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));z-index:6;min-height:36px;font-size:13px}
+#hide{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:max(8px,env(safe-area-inset-right,0px));z-index:6;min-height:30px;font-size:12px;padding:3px 9px}
 body.proj #bar,body.proj #hint,body.proj #ov,body.proj #hide{display:none}
 body.min #bar{display:none}
 body.cool #bar{pointer-events:none}
-#nudge .lbl{min-width:58px;text-align:right}
-#nudge button{min-width:52px;font-size:18px}
+#nudge .lbl{min-width:44px;text-align:right}
+#nudge button[data-n]{min-width:40px;font-size:16px}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px}
 .layer.free>*:not(.fcv){visibility:hidden}
 .layer .fcv{position:absolute;left:0;top:0}
 body.locked #ov,body.locked #nudge{display:none!important}
@@ -44,26 +46,25 @@ body.locked .edit{opacity:.35;pointer-events:none}
 <button id="hide">Hide bar</button>
 <button id="exit" hidden>Exit projection</button>
 <div id="bar">
-  <div class="row">
-    <span class="lbl">Add</span>
-    <button class="edit" data-add="quad" title="Square / 4-corner"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/></svg>Square</button>
-    <button class="edit" data-add="circle" title="Circle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>Circle</button>
-    <button class="edit" data-add="tri" title="Triangle"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/></svg>Triangle</button>
-    <button class="edit" data-add="free" title="Freeform"><svg viewBox="0 0 24 24"><path d="M4 8l6-4 9 3 1 8-7 5-9-3z"/></svg>Free</button>
-  </div>
   <div class="row" id="nudge" hidden>
     <span class="lbl" id="nlbl">Corner</span>
     <button data-n="-1,0" aria-label="Nudge left">&larr;</button>
     <button data-n="0,-1" aria-label="Nudge up">&uarr;</button>
     <button data-n="0,1" aria-label="Nudge down">&darr;</button>
     <button data-n="1,0" aria-label="Nudge right">&rarr;</button>
+    <span id="ptbtns" class="edit" hidden><span class="sep"></span><button id="addpt">+ Point</button> <button id="delpt">&minus; Point</button></span>
   </div>
   <div class="row">
+    <span class="lbl">Add</span>
+    <button class="edit" data-add="quad" title="Add square" aria-label="Add square"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/></svg></button>
+    <button class="edit" data-add="circle" title="Add circle" aria-label="Add circle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></button>
+    <button class="edit" data-add="tri" title="Add triangle" aria-label="Add triangle"><svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/></svg></button>
+    <button class="edit" data-add="free" title="Add freeform" aria-label="Add freeform"><svg viewBox="0 0 24 24"><path d="M4 8l6-4 9 3 1 8-7 5-9-3z"/></svg></button>
+    <span class="sep"></span>
     <label class="btn edit" for="file">Image</label><input id="file" type="file" accept="image/*,video/*">
-    <span id="ptbtns" class="edit" hidden><button id="addpt">+ Point</button> <button id="delpt">− Point</button></span>
     <button id="grid">Grid</button>
     <span class="op edit">Fade <input id="opa" type="range" min="0" max="1" step="0.05" value="1"></span>
-    <button id="up" class="edit" title="Bring forward">Front</button>
+    <button id="up" class="edit" title="Bring to front">Front</button>
     <button id="del" class="edit">Delete</button>
     <button id="clr" class="edit">Clear all</button>
     <button id="lock">Lock</button>
