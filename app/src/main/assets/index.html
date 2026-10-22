@@ -123,6 +123,7 @@ body.locked .edit{opacity:.35;pointer-events:none}
     <button data-n="0,1" aria-label="Nudge down">&darr;</button>
     <button data-n="1,0" aria-label="Nudge right">&rarr;</button>
     <span id="ptbtns" class="edit" hidden><span class="sep"></span><button id="addpt">+ Point</button> <button id="delpt">&minus; Point</button></span>
+    <span class="sep"></span><button id="del2" class="edit">Delete</button>
   </div>
   <div class="row">
     <span class="lbl">Add</span>
@@ -388,6 +389,7 @@ $('react').onclick=()=>{if(!sel)return;sel.react=!sel.react;syncUI();save();
   if(sel.react&&!analyser)toast('Tap Show, then Listen, to react to sound. MIDI notes work straight away.',3600)};
 document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{addLayer(b.dataset.add);render();save()});
 $('del').onclick=()=>{if(!sel)return;sel.el.remove();layers=layers.filter(l=>l!==sel);sel=null;selPt=-1;render();save()};
+$('del2').onclick=()=>$('del').click();
 $('up').onclick=()=>{if(!sel)return;layers=layers.filter(l=>l!==sel);layers.push(sel);render();save()};
 $('grid').onclick=()=>{showGrid=!showGrid;dirtyAll();syncUI()};
 let clrArm=null;
