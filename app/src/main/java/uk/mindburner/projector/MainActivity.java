@@ -59,6 +59,12 @@ public class MainActivity extends Activity {
         } else super.onActivityResult(req, res, data);
     }
 
+    @Override public void onBackPressed() {
+        web.evaluateJavascript("window.exitProj ? String(exitProj()) : 'false'", r -> {
+            if (!"\"true\"".equals(r)) finish();
+        });
+    }
+
     @Override public void onWindowFocusChanged(boolean f) { super.onWindowFocusChanged(f); if (f) immersive(); }
 
     @SuppressWarnings("deprecation")
