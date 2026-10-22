@@ -16,7 +16,7 @@ jobs:
           if [ -f app-icon.png ]; then
             for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do cp app-icon.png app/src/main/res/mipmap-$d/ic_launcher.png; done
           fi
-            - name: Stamp version number
+      - name: Stamp version number
         run: sed -i "s/__VERSION__/1.0.${{ github.run_number }}/" app/src/main/assets/index.html
       - name: Restore signing key
         env:
