@@ -28,10 +28,11 @@ input[type=range]{width:90px;accent-color:var(--accent)}
 #hide{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));z-index:6;min-height:36px;font-size:13px}
 body.proj #bar,body.proj #hint,body.proj #ov,body.proj #hide{display:none}
 body.min #bar{display:none}
+body.cool #bar{pointer-events:none}
 </style>
 
 <div id="stage"><svg id="ov"></svg></div>
-<div id="hint">Add a shape, drag its cyan points onto your surface, then load an image. Double-tap the screen while projecting to bring the controls back.</div>
+<div id="hint">Add a shape, drag its cyan points onto your surface, then load an image. Press and hold the screen for a second while projecting to bring the controls back.</div>
 <button id="hide">Hide bar</button>
 <div id="bar">
   <div class="row">
@@ -48,6 +49,7 @@ body.min #bar{display:none}
     <span class="op">Fade <input id="opa" type="range" min="0" max="1" step="0.05" value="1"></span>
     <button id="up" title="Bring forward">Front</button>
     <button id="del">Delete</button>
+    <button id="clr">Clear all</button>
     <button id="go" class="go">Project</button>
   </div>
 </div>
@@ -151,7 +153,7 @@ function attachMedia(L,blob){
   else{m=new Image();m.onload=()=>{setMediaSize(L,m.naturalWidth,m.naturalHeight);render()};m.src=url}
   L.media.replaceWith(m);L.media=m;
 }
-document.getElementById('file').onchange=e=>{const f=e.target.files[0];if(!f||!sel)return;
+document.getElementById('file').onchange=e=>{const f=e.target.files[0];if(!f)return;if(!sel)addLayer('quad');
   attachMedia(sel,f);dbPut(sel.id,f);e.target.value=''};
 
 /* ---------- buttons ---------- */
@@ -159,6 +161,11 @@ document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{addLayer(b.dat
 document.getElementById('del').onclick=()=>{if(!sel)return;sel.el.remove();dbDel(sel.id);layers=layers.filter(l=>l!==sel);sel=layers.at(-1)||null;render();save()};
 document.getElementById('up').onclick=()=>{if(!sel)return;layers=layers.filter(l=>l!==sel);layers.push(sel);render();save()};
 document.getElementById('grid').onclick=()=>{showGrid=!showGrid;render()};
+let clrArm=null;
+document.getElementById('clr').onclick=e=>{const b=e.currentTarget;
+  if(!clrArm){b.textContent='Tap again to clear';clrArm=setTimeout(()=>{clrArm=null;b.textContent='Clear all'},2500);return}
+  clearTimeout(clrArm);clrArm=null;b.textContent='Clear all';
+  layers.forEach(l=>{l.el.remove();dbDel(l.id)});layers=[];sel=null;render();save()};
 document.getElementById('opa').oninput=e=>{if(sel){sel.opacity=+e.target.value;render();save()}};
 document.getElementById('addpt').onclick=()=>{if(!sel||sel.type!=='free')return;const n=sel.pts.length,a=sel.pts[selPt],b=sel.pts[(selPt+1)%n];
   sel.pts.splice(selPt+1,0,[(a[0]+b[0])/2,(a[1]+b[1])/2]);selPt++;render();save()};
@@ -170,9 +177,17 @@ let wake=null;
 document.getElementById('go').onclick=async()=>{document.body.classList.add('proj');showGrid=false;render();
   try{await document.documentElement.requestFullscreen()}catch(_){}
   try{wake=await navigator.wakeLock.request('screen')}catch(_){}};
-let lastTap=0;
-stage.addEventListener('pointerdown',()=>{if(!document.body.classList.contains('proj'))return;
-  const n=Date.now();if(n-lastTap<350){document.body.classList.remove('proj');try{document.exitFullscreen()}catch(_){}try{wake&&wake.release()}catch(_){}render()}lastTap=n});
+function exitProj(){if(!document.body.classList.contains('proj'))return false;
+  document.body.classList.remove('proj');document.body.classList.add('cool');
+  setTimeout(()=>document.body.classList.remove('cool'),700);
+  try{document.exitFullscreen()}catch(_){}try{wake&&wake.release()}catch(_){}render();return true}
+window.exitProj=exitProj;
+let hold=null,hx=0,hy=0;
+stage.addEventListener('pointerdown',e=>{if(!document.body.classList.contains('proj'))return;
+  hx=e.clientX;hy=e.clientY;clearTimeout(hold);hold=setTimeout(exitProj,800)});
+stage.addEventListener('pointermove',e=>{if(hold&&Math.hypot(e.clientX-hx,e.clientY-hy)>25){clearTimeout(hold);hold=null}});
+['pointerup','pointercancel'].forEach(t=>stage.addEventListener(t,()=>{clearTimeout(hold);hold=null}));
+stage.addEventListener('contextmenu',e=>e.preventDefault());
 
 /* ---------- saving: layout in localStorage, images in IndexedDB ---------- */
 let db=null;
@@ -187,7 +202,7 @@ async function load(){let d=null;try{d=JSON.parse(localStorage.getItem('ppm2')||
   render();return true}
 
 addEventListener('resize',render);
-(async()=>{await dbOpen();if(!(await load())){addLayer('quad');addLayer('circle');layers[1].pts=layers[1].pts.map(p=>[p[0]+Math.min(W(),H())*.35,p[1]+30]);render()}})();
+(async()=>{await dbOpen();await load();render()})();
 setTimeout(()=>document.getElementById('hint').hidden=true,8000);
 </script>
 </body></html>
