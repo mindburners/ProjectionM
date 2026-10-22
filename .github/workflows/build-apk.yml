@@ -11,6 +11,11 @@ jobs:
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: '8.7' }
+      - name: Use the app icon
+        run: |
+          if [ -f app-icon.png ]; then
+            for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do cp app-icon.png app/src/main/res/mipmap-$d/ic_launcher.png; done
+          fi
       - name: Restore signing key
         env:
           K: ${{ secrets.KEYSTORE_B64 }}
