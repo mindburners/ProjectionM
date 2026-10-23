@@ -11,6 +11,7 @@ import android.media.midi.MidiManager;
 import android.media.midi.MidiOutputPort;
 import android.media.midi.MidiReceiver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,6 +24,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.window.OnBackInvokedDispatcher;
 import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -88,6 +90,9 @@ public class MainActivity extends Activity {
             // https origin so saved layouts, images and the microphone work
             web.loadDataWithBaseURL("https://projector.local/", out.toString("UTF-8"), "text/html", "UTF-8", null);
         } catch (Exception e) { e.printStackTrace(); }
+        if (Build.VERSION.SDK_INT >= 33) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::handleBack);
+        }
         immersive();
     }
 
@@ -180,11 +185,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override public void onBackPressed() {
+    /* back: leave projection, then close an open page, otherwise close the app */
+    private void handleBack() {
         web.evaluateJavascript("window.exitProj ? String(exitProj()) : 'false'", r -> {
             if (!"\"true\"".equals(r)) finish();
         });
     }
+
+    @SuppressWarnings("deprecation")
+    @Override public void onBackPressed() { handleBack(); }
 
     @Override public void onWindowFocusChanged(boolean f) { super.onWindowFocusChanged(f); if (f) immersive(); }
 
