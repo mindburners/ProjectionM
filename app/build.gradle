@@ -1,11 +1,11 @@
 plugins { id 'com.android.application' }
 android {
     namespace 'uk.mindburner.projector'
-    compileSdk 34
+    compileSdk 36
     defaultConfig {
         applicationId "uk.mindburner.projector"
         minSdk 24
-        targetSdk 34
+        targetSdk 36
         versionCode((System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger())
         versionName "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
     }
